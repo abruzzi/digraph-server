@@ -15,6 +15,17 @@ function translateAttrsFromGraph(graph) {
 	return graph;	
 }
 
+function translateAttrsFromCell(cell) {
+	var attrs = cell.attrs;
+
+	cell.attrs = _.mapKeys(attrs, function(value, key) {
+		return key.replace(/\./g, '_');
+	})
+	
+	return cell;
+}
+
 module.exports = {
-	translateAttrsFromGraph: translateAttrsFromGraph
+	translateAttrsFromGraph: translateAttrsFromGraph,
+	translateAttrsFromCell: translateAttrsFromCell
 };

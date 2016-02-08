@@ -45,15 +45,7 @@ app.get('/api/graph', function(req, res, next) {
 
 app.post('/api/graph', function(req, res, next) {
 
-	var cells = _.map(req.body.cells, function(cell) {
-		var attrs = cell.attrs;
-
-		cell.attrs = _.mapKeys(attrs, function(value, key) {
-			return key.replace(/\./g, '_');
-		})
-		
-		return cell;
-	});
+	var cells = _.map(req.body.cells, translater.translateAttrsFromCell);
 
 	var graph = new Graph({
 		cells: cells
@@ -66,6 +58,19 @@ app.post('/api/graph', function(req, res, next) {
 
 		res.status(201).json(graph);
 	});
+});
+
+app.put('/api/graph/:id', function(req, res, next) {
+	var cells = _.map(req.body.cells, translater.translateAttrsFromCell);
+	console.log(cells);
+
+	Graph.findOneAndUpdate({_id: req.params.id}, {cells: cells}, function(err, graph) {
+		if(err) {
+			return next(err);
+		}
+
+		res.status(201).json(graph);
+	})
 });
 
 app.listen(3000, function () {
