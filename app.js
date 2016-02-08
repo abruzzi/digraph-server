@@ -2,6 +2,8 @@ var express = require('express');
 var bodyParser = require('body-parser')
 var _ = require('lodash');
 
+var translater = require('./utils/translater');
+
 var app = express();
 
 app.use(bodyParser.json())
@@ -17,6 +19,16 @@ app.get('/', function (req, res) {
 
 var Graph = require('./models/graph');
 
+app.get('/api/graph/:id', function(req, res, next) {
+	Graph.findOne({_id: req.params.id}, function(err, graph) {
+		if(err) {
+			return next(err);
+		}
+
+		res.status(200).json(translater.translateAttrsFromGraph(graph));
+	});
+});
+
 app.get('/api/graph', function(req, res, next) {
 	Graph.find(function(err, graphs) {
 		if(err){
@@ -24,21 +36,8 @@ app.get('/api/graph', function(req, res, next) {
 		}
 
 		var gs = _.map(graphs, function(graph) {
-			var cells = graph.cells;
-
-			graph.cells = _.map(cells, function(cell) {
-				var attrs = cell.attrs;
-				cell.attrs = _.mapKeys(attrs, function(value, key) {
-					return key.replace(/_/g, '.');
-				});
-
-				return cell;
-			});
-
-			return graph;
+			return translater.translateAttrsFromGraph(graph);
 		});
-
-		console.log(JSON.stringify(gs));
 
 		res.status(200).json(gs);
 	});
