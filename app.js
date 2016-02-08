@@ -23,19 +23,34 @@ app.get('/api/graph', function(req, res, next) {
 			return next(err);
 		}
 
-		res.status(200).json(graphs);
+		console.log(JSON.stringify(graphs));
+
+		var gs = _.map(graphs, function(graph) {
+			console.log(graph.cells);
+			return _.map(_.map(graph.cells, 'attrs'), function(attr) {
+				return _.mapKeys(attr, function(v, k) {
+					return k.replace(/_/g, '.');
+				});
+			});			
+		});
+
+		console.log(JSON.stringify(gs));
+
+		res.status(200).json(gs);
 	});
 });
 
 app.post('/api/graph', function(req, res, next) {
 
-	var cells = _.map(_.map(req.body.cells, 'attrs'), function(attr) {
-		return _.mapKeys(attr, function(v, k) {
-			return k.replace(/\./g, '_')
+	var cells = _.map(req.body.cells, function(cell) {
+		var attrs = cell.attrs;
+		
+		cell.attrs = _.mapKeys(attrs, function(value, key) {
+			return key.replace(/\./g, '_');
 		})
+		
+		return cell;
 	});
-
-	console.log(cells);
 
 	var graph = new Graph({
 		cells: cells
