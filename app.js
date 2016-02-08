@@ -23,15 +23,19 @@ app.get('/api/graph', function(req, res, next) {
 			return next(err);
 		}
 
-		console.log(JSON.stringify(graphs));
-
 		var gs = _.map(graphs, function(graph) {
-			console.log(graph.cells);
-			return _.map(_.map(graph.cells, 'attrs'), function(attr) {
-				return _.mapKeys(attr, function(v, k) {
-					return k.replace(/_/g, '.');
+			var cells = graph.cells;
+
+			graph.cells = _.map(cells, function(cell) {
+				var attrs = cell.attrs;
+				cell.attrs = _.mapKeys(attrs, function(value, key) {
+					return key.replace(/_/g, '.');
 				});
-			});			
+
+				return cell;
+			});
+
+			return graph;
 		});
 
 		console.log(JSON.stringify(gs));
@@ -44,7 +48,7 @@ app.post('/api/graph', function(req, res, next) {
 
 	var cells = _.map(req.body.cells, function(cell) {
 		var attrs = cell.attrs;
-		
+
 		cell.attrs = _.mapKeys(attrs, function(value, key) {
 			return key.replace(/\./g, '_');
 		})
